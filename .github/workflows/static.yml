@@ -1,0 +1,31 @@
+name: Publicar Câmara 16-Bit
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/static.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - name: Baixar e verificar a versão estática
+        run: |
+          curl --fail --location --retry 3 --output site.zip https://github.com/Monteiro619/camara-16-bit-demo/releases/download/demo-v1/camara-16-bit-pages.zip
+          echo 'f60b9a644e15f28a2376f512d50f67809099e5140e446300fd07ee1781c283d8  site.zip' | sha256sum --check
+          unzip -q site.zip -d site
+          test -f site/index.html
+          test -f site/camara-data.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4
